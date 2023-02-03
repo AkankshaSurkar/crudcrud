@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form onsubmit="saveToLocalStorage(event)">
+      <h1>Book Appointment Call</h1>
+      <label> Name </label>
+      <input type="text" name="username" required />
+      <label> Email </label>
+      <input type="text" name="emailId" required />
+      <label> PhoneNo </label>
+      <input type="tel" name="phoneno" />
+      <button>Submit</button>
+    </form>
+    <ul id="listOfitems"></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.0/axios.min.js"></script>
+    <script>
+      function saveToLocalStorage(event) {
+        event.preventDefault();
+        const name = event.target.username.value;
+        const email = event.target.emailId.value;
+        const phoneno = event.target.phoneno.value;
+
+        const obj = {
+          name,
+          email,
+          phoneno,
+        };
+        axios
+          .post(
+            "https://crudcrud.com/api/f1c5e6e940914ef0807ed61fdda3e541/AppointmentData",
+            obj
+          )
+          .then((response) => {
+            showUserOnScreen(response.data);
+            console.log(response);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+        // localStorage.setItem(obj.email, JSON.stringify(obj));
+        //showUserOnScreen(obj);
+      }
+      
+      window.addEventListener("DOMContentLoaded", () => {
+        const data = axios
+          .get(
+            "https://crudcrud.com/api/f1c5e6e940914ef0807ed61fdda3e541/AppointmentData"
+          )
+          .then((response) => {
+            for (let i = 0; i < response.data.length; i++) {
+              showNewUserOnScreen(response.data[i]);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+        console.log(data);
+      });
+      function showNewUserOnScreen(obj) {
+        const parentElem = document.getElementById("listOfitems");
+        const childElem = document.createElement("li");
+        childElem.textContent = obj.name + "-" + obj.email + "-" + obj.phoneno;
+
+        const deleteButton = document.createElement("input");
+        deleteButton.value = "Delete";
+        deleteButton.onclick = () => {
+          localStorage.removeItem(obj.email);
+          parentElem.removeChild(childElem);
+        };
+        childElem.appendChild(deleteButton);
+        parentElem.appendChild(childElem);
+      }
+    </script>
+  </body>
+</html>
