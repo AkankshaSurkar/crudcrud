@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form onsubmit="saveToLocalStorage(event)">
+      <h1>Booking App</h1>
+      <label> Name </label>
+      <input type="text" name="username" id="usernameInputTag" required />
+      <label> Email </label>
+      <input type="text" name="emailId" id="emailIdInputTag" required />
+      <label> PhoneNo </label>
+      <input type="tel" name="phoneno" id="phoneInputTag" />
+      <button>Submit</button>
+    </form>
+    <ul id="listOfitems"></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.0/axios.min.js"></script>
+    <script>
+      function saveToLocalStorage(event) {
+        event.preventDefault();
+        const name = event.target.username.value;
+        const email = event.target.emailId.value;
+        const phoneno = event.target.phoneno.value;
+
+        const obj = {
+          name,
+          email,
+          phoneno,
+        };
+        axios
+          .post(
+            "https://crudcrud.com/api/f1c5e6e940914ef0807ed61fdda3e541/BookingData",
+            obj
+          )
+          .then((response) => {
+            showUserOnScreen(response.data);
+            console.log(response);
+          })
+          .catch((err) => {
+            document.body.innerHTML =
+              document.body.innerHTML + "<h4> Somthing went wrong</h4>";
+            console.log(err);
+          });
+        }
+        // localStorage.setItem(obj.email, JSON.stringify(obj));
+        //showUserOnScreen(obj);
+
+        window.addEventListener("DOMContentLoaded", () => {
+          const data = axios
+            .get(
+              "https://crudcrud.com/api/f1c5e6e940914ef0807ed61fdda3e541/BookingData"
+            )
+            .then((response) => {
+              console.log(response)
+              for (let i = 0; i < response.data.length; i++) {
+                showUserOnScreen(response.data[i]);
+              }
+            })
+
+            .catch((err) => {
+              console.log(err);
+            });
+            console.log(data);
+
+        });
+
+        function showUserOnScreen(user) {
+          //user = {
+          //  _id: '',
+          //  name: '',
+          //   email: '',
+          //   phoneno: ''
+          // };
+          document.getElementById('usernameInputTag').value = '';
+          document.getElementById('emailIdInputTag').value = '';
+          document.getElementById('phoneInputTag').value = '';
+
+          if (localStorage.getItem(user.email) !== null) {
+            removeUserFromScreen(user.email);
+          }
+
+          const parentElem = document.getElementById("listOfitems");
+          const childElem = `<li id=${user._id}> ${user.name} - ${user.email} - ${user.phoneno}
+            <button onclick=deleteUser('${user._id}')>DeleteButton</button>
+            <button onclick=editUser('${user._id}')>EditButton</button>
+            </li>`;
+
+          parentElem.innerHTML += childElem;
+
+          //edit user
+          function editUserDetails(emailId, name, phoneno) {
+            document.getElementById('emailIdInputTag').value = emailId;
+            document.getElementById('usernameInputTag').value = name;
+            document.getElementById('phoneInputTag').value = phoneno;
+            deleteUser(emailId)
+          }
+
+          function deleteUser(userId) {
+            axios
+              .delete(
+                `https://crudcrud.com/api/f1c5e6e940914ef0807ed61fdda3e541/BookingData/${userId}`
+              )
+              .then((response) => {
+                removeUserFromScreen(userId);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+          function removeUserFromScreen(userId) {
+            const parentElem = document.getElementById('listOfitems');
+            const childElemToBeDeleted = document.getElementById(userId);
+            if (childElemToBeDeleted) {
+              parentElem.removeChild(childElem);
+            }
+          }
+        }
+      
+    </script>
+  </body>
+</html>
+
+
