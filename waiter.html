@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+  </head>
+  <body>
+    <form onsubmit="saveToLocalStorage(event)">
+      <h1>Waiter Call</h1>
+      <label> Choose Price:</label>
+      <input type="number" name="price" id="pricetag" required />
+      <label> Choose Dish:</label>
+      <input type="text" name="dish" id="dishtag" required />
+      <label> Choose a Table: </label>
+      <input type="text" name="table" id="tabletag"  required/>
+
+      <button>Add to bill</button>
+      <h2>Orders</h2>
+
+
+    </form>
+    <ul id="listOfitems"></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.0/axios.min.js"></script>
+    <script>
+      function saveToLocalStorage(event) {
+        event.preventDefault();
+        const price = event.target.price.value;
+        const dish = event.target.dish.value;
+        const table = event.target.table.value;
+
+        const obj = {
+         price,
+         dish,
+         table,
+        };
+        axios
+          .post(
+            "https://crudcrud.com/api/2e34dd91a0214fb9b7cf4c6f1d334326/Welcomedata",
+            obj
+          )
+          .then((response) => {
+            showUserOnScreen(response.data);
+            console.log(response);
+          })
+          .catch((err) => {
+            document.body.innerHTML =
+              document.body.innerHTML + "<h4> Somthing went wrong</h4>";
+            console.log(err);
+          });
+        }
+        // localStorage.setItem(obj.email, JSON.stringify(obj));
+        //showUserOnScreen(obj);
+
+        window.addEventListener("DOMContentLoaded", () => {
+          const data = axios
+            .get(
+              "https://crudcrud.com/api/2e34dd91a0214fb9b7cf4c6f1d334326/Welcomedata"
+            )
+            .then((response) => {
+              console.log(response)
+              for (let i = 0; i < response.data.length; i++) {
+                showUserOnScreen(response.data[i]);
+              }
+            })
+
+            .catch((err) => {
+              console.log(err);
+            });
+            console.log(data);
+
+        });
+
+        function showUserOnScreen(obj) {
+            
+          document.getElementById('pricetag').value = '';
+          document.getElementById('dishtag').value = '';
+          document.getElementById('tabletag').value = '';
+
+          if (localStorage.getItem(obj.table) !== null) {
+            removeUserFromScreen(obj.table);
+          }
+
+          const parentElem = document.getElementById("listOfitems");
+          const childElem = `<li id=${obj._id}> ${obj.price} - ${obj.dish} - ${obj.table}
+            <button onclick=deleteUser('${obj._id}')>Delete order</button>  </li>`;
+            //<button onclick=editUser('${user._id}')>EditButton</button>
+           // </li>`;
+
+          parentElem.innerHTML += childElem;
+        }
+        
+          //edit user
+        //   function editUserDetails(emailId, name, phoneno) {
+        //     document.getElementById('emailIdInputTag').value = emailId;
+        //     document.getElementById('usernameInputTag').value = name;
+        //     document.getElementById('phoneInputTag').value = phoneno;
+        //     deleteUser(emailId)
+        //   }
+
+          function deleteUser(objId) {
+            axios
+              .delete(
+                `https://crudcrud.com/api/2e34dd91a0214fb9b7cf4c6f1d334326/Welcomedata/${objId}`
+              )
+              .then((response) => {
+                removeUserFromScreen(objId);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          
+          function removeUserFromScreen(objId) {
+            const parentElem = document.getElementById('listOfitems');
+            const childElemToBeDeleted = document.getElementById(objId);
+            if (childElemToBeDeleted) {
+              parentElem.removeChild(childElemToBeDeleted);
+            }
+          }
+        }
+
+
+      
+    </script>
+  </body>
+</html>
+
+
